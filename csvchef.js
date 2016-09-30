@@ -55,10 +55,12 @@ var grammar = {
             return d.join("");
         }
         },
-    {"name": "operation$string$1", "symbols": [{"literal":"i"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "operation$string$2", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"l"}, {"literal":"a"}, {"literal":"c"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "operation$string$3", "symbols": [{"literal":"w"}, {"literal":"i"}, {"literal":"t"}, {"literal":"h"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "operation", "symbols": ["operation$string$1", "__", "field", "__", "operation$string$2", "__", "string_or_regexp", "__", "operation$string$3", "__", "string"], "postprocess": 
+    {"name": "main", "symbols": []},
+    {"name": "main", "symbols": ["main", "replace"]},
+    {"name": "replace$string$1", "symbols": [{"literal":"i"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "replace$string$2", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"l"}, {"literal":"a"}, {"literal":"c"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "replace$string$3", "symbols": [{"literal":"w"}, {"literal":"i"}, {"literal":"t"}, {"literal":"h"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "replace", "symbols": ["replace$string$1", "__", "field", "__", "replace$string$2", "__", "string_or_regexp", "__", "replace$string$3", "__", "string", "_"], "postprocess": 
         function(d) {
             return JSON.parse(["\"", d[2], ":str.replace(", d[6], ",@@@", d[10], "@@@)\""].join("")).replace(/@@@/g, "\"");
         }
@@ -66,12 +68,13 @@ var grammar = {
     {"name": "string_or_regexp", "symbols": ["string"]},
     {"name": "string_or_regexp", "symbols": ["regexp"]},
     {"name": "string", "symbols": ["dqstring"]},
+    {"name": "string", "symbols": ["sqstring"]},
     {"name": "field$string$1", "symbols": [{"literal":"N"}, {"literal":"a"}, {"literal":"m"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "field", "symbols": ["field$string$1"]},
     {"name": "regexp$string$1", "symbols": [{"literal":"/"}, {"literal":"a"}, {"literal":"b"}, {"literal":"c"}, {"literal":"/"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "regexp", "symbols": ["regexp$string$1"]}
 ]
-  , ParserStart: "operation"
+  , ParserStart: "main"
 }
 if (typeof module !== 'undefined'&& typeof module.exports !== 'undefined') {
    module.exports = grammar;

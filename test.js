@@ -4,17 +4,28 @@
 function id(x) {return x[0]; }
 var grammar = {
     ParserRules: [
-    {"name": "P", "symbols": ["S"]},
-    {"name": "S", "symbols": ["S", {"literal":"+"}, "M"]},
-    {"name": "S", "symbols": ["M"]},
-    {"name": "M", "symbols": ["M", {"literal":"*"}, "T"]},
-    {"name": "M", "symbols": ["T"]},
-    {"name": "T", "symbols": [{"literal":"1"}]},
-    {"name": "T", "symbols": [{"literal":"2"}]},
-    {"name": "T", "symbols": [{"literal":"3"}]},
-    {"name": "T", "symbols": [{"literal":"4"}]}
+    {"name": "_$ebnf$1", "symbols": []},
+    {"name": "_$ebnf$1", "symbols": ["wschar", "_$ebnf$1"], "postprocess": function arrconcat(d) {return [d[0]].concat(d[1]);}},
+    {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": function(d) {return null;}},
+    {"name": "__$ebnf$1", "symbols": ["wschar"]},
+    {"name": "__$ebnf$1", "symbols": ["wschar", "__$ebnf$1"], "postprocess": function arrconcat(d) {return [d[0]].concat(d[1]);}},
+    {"name": "__", "symbols": ["__$ebnf$1"], "postprocess": function(d) {return null;}},
+    {"name": "wschar", "symbols": [/[ \t\n\v\f]/], "postprocess": id},
+    {"name": "main", "symbols": []},
+    {"name": "main", "symbols": ["main", "statement", "_"]},
+    {"name": "statement", "symbols": ["b"]},
+    {"name": "statement", "symbols": ["c"]},
+    {"name": "b$string$1", "symbols": [{"literal":"b"}, {"literal":"o"}, {"literal":"w"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "b", "symbols": ["b$string$1"]},
+    {"name": "c$string$1", "symbols": [{"literal":"c"}, {"literal":"o"}, {"literal":"w"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "c$string$2", "symbols": [{"literal":"d"}, {"literal":"o"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "c", "symbols": ["c$string$1", "__", "c$string$2"], "postprocess": 
+        function(d) {
+            return JSON.parse(["\"", d.join("."), "\""].join(""));
+        }
+        }
 ]
-  , ParserStart: "P"
+  , ParserStart: "main"
 }
 if (typeof module !== 'undefined'&& typeof module.exports !== 'undefined') {
    module.exports = grammar;

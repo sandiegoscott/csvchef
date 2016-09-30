@@ -1,12 +1,14 @@
-P -> S
+@builtin "whitespace.ne"
 
-S -> S "+" M
-   | M
+main -> null
+    | main statement _
 
-M -> M "*" T
-   | T
+statement -> b | c
 
-T -> "1"
-   | "2"
-   | "3"
-   | "4"
+b -> "bow"
+
+c -> "cow" __ "dog" {%
+    function(d) {
+        return JSON.parse(["\"", d.join("."), "\""].join(""));
+    }
+%}
