@@ -2,6 +2,11 @@
 // http://github.com/Hardmath123/nearley
 (function () {
 function id(x) {return x[0]; }
+ function flatten(arr) {
+  return arr.reduce(function (flat, toFlatten) {
+    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+  }, []);
+} 
 
 function nth(n) {
     return function(d) {
@@ -56,17 +61,31 @@ var grammar = {
         }
         },
     {"name": "main", "symbols": []},
-    {"name": "main", "symbols": ["main", "replace"]},
+    {"name": "main", "symbols": ["main", "statement"], "postprocess": function(data) { return flatten(data); }},
+    {"name": "statement", "symbols": ["write"]},
+    {"name": "statement", "symbols": ["replace"]},
+    {"name": "statement", "symbols": ["insert"]},
+    {"name": "write$string$1", "symbols": [{"literal":"t"}, {"literal":"o"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "write", "symbols": ["write$string$1", "__", "field", "__", "write_append_prepend", "__", "string", "_"], "postprocess": function(d) { return JSON.parse(["\"", d[2], ":str.append(@@@", d[6], "@@@\""].join("")).replace(/@@@/g, "\""); }},
     {"name": "replace$string$1", "symbols": [{"literal":"i"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "replace$string$2", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"l"}, {"literal":"a"}, {"literal":"c"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "replace$string$3", "symbols": [{"literal":"w"}, {"literal":"i"}, {"literal":"t"}, {"literal":"h"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "replace", "symbols": ["replace$string$1", "__", "field", "__", "replace$string$2", "__", "string_or_regexp", "__", "replace$string$3", "__", "string", "_"], "postprocess": 
-        function(d) {
-            return JSON.parse(["\"", d[2], ":str.replace(", d[6], ",@@@", d[10], "@@@)\""].join("")).replace(/@@@/g, "\"");
-        }
-        },
+    {"name": "replace", "symbols": ["replace$string$1", "__", "field", "__", "replace$string$2", "__", "string_or_regexp", "__", "replace$string$3", "__", "string", "_"], "postprocess": function(d) { return JSON.parse(["\"", d[2], ":str.replace(", d[6], ",@@@", d[10], "@@@)\""].join("")).replace(/@@@/g, "\""); }},
+    {"name": "insert$string$1", "symbols": [{"literal":"i"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "insert$string$2", "symbols": [{"literal":"i"}, {"literal":"n"}, {"literal":"s"}, {"literal":"e"}, {"literal":"r"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "insert", "symbols": ["insert$string$1", "__", "field", "__", "before_after", "__", "string_or_regexp", "__", "insert$string$2", "__", "string", "_"], "postprocess": function(d) { return JSON.parse(["\"", d[2], ":str.insert_before(", d[6], ",@@@", d[10], "@@@)\""].join("")).replace(/@@@/g, "\""); }},
     {"name": "string_or_regexp", "symbols": ["string"]},
     {"name": "string_or_regexp", "symbols": ["regexp"]},
+    {"name": "write_append_prepend$string$1", "symbols": [{"literal":"w"}, {"literal":"r"}, {"literal":"i"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "write_append_prepend", "symbols": ["write_append_prepend$string$1"]},
+    {"name": "write_append_prepend$string$2", "symbols": [{"literal":"a"}, {"literal":"p"}, {"literal":"p"}, {"literal":"e"}, {"literal":"n"}, {"literal":"d"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "write_append_prepend", "symbols": ["write_append_prepend$string$2"]},
+    {"name": "write_append_prepend$string$3", "symbols": [{"literal":"p"}, {"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"e"}, {"literal":"n"}, {"literal":"d"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "write_append_prepend", "symbols": ["write_append_prepend$string$3"]},
+    {"name": "before_after$string$1", "symbols": [{"literal":"b"}, {"literal":"e"}, {"literal":"f"}, {"literal":"o"}, {"literal":"r"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "before_after", "symbols": ["before_after$string$1"]},
+    {"name": "before_after$string$2", "symbols": [{"literal":"a"}, {"literal":"f"}, {"literal":"t"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "before_after", "symbols": ["before_after$string$2"]},
     {"name": "string", "symbols": ["dqstring"]},
     {"name": "string", "symbols": ["sqstring"]},
     {"name": "field$string$1", "symbols": [{"literal":"N"}, {"literal":"a"}, {"literal":"m"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},

@@ -1,0 +1,4 @@
+
+nearleyc csvchef.ne -o csvchef.js
+
+cat csvchef.txt | nearley-test -q csvchef.js

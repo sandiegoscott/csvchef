@@ -1,4 +1,3 @@
+to Name append "the IIIrd"
 in Name replace /abc/ with "xyz"
-
-
-in Name replace /abc/ with "def"
+in Name before "abc" insert "def"

@@ -12,18 +12,9 @@ var grammar = {
     {"name": "__", "symbols": ["__$ebnf$1"], "postprocess": function(d) {return null;}},
     {"name": "wschar", "symbols": [/[ \t\n\v\f]/], "postprocess": id},
     {"name": "main", "symbols": []},
-    {"name": "main", "symbols": ["main", "statement", "_"]},
-    {"name": "statement", "symbols": ["b"]},
-    {"name": "statement", "symbols": ["c"]},
-    {"name": "b$string$1", "symbols": [{"literal":"b"}, {"literal":"o"}, {"literal":"w"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "b", "symbols": ["b$string$1"]},
-    {"name": "c$string$1", "symbols": [{"literal":"c"}, {"literal":"o"}, {"literal":"w"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "c$string$2", "symbols": [{"literal":"d"}, {"literal":"o"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "c", "symbols": ["c$string$1", "__", "c$string$2"], "postprocess": 
-        function(d) {
-            return JSON.parse(["\"", d.join("."), "\""].join(""));
-        }
-        }
+    {"name": "main", "symbols": ["main", "statement"]},
+    {"name": "statement$string$1", "symbols": [{"literal":"s"}, {"literal":"t"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}, {"literal":"m"}, {"literal":"e"}, {"literal":"n"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "statement", "symbols": ["_", "statement$string$1", "_"]}
 ]
   , ParserStart: "main"
 }
