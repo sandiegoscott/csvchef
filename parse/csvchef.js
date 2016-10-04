@@ -88,8 +88,7 @@ var grammar = {
     {"name": "before_after", "symbols": ["before_after$string$2"]},
     {"name": "string", "symbols": ["dqstring"]},
     {"name": "string", "symbols": ["sqstring"]},
-    {"name": "field$string$1", "symbols": [{"literal":"N"}, {"literal":"a"}, {"literal":"m"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "field", "symbols": ["field$string$1"]},
+    {"name": "field", "symbols": [/[a-zA-Z0-9]/]},
     {"name": "regexp$string$1", "symbols": [{"literal":"/"}, {"literal":"a"}, {"literal":"b"}, {"literal":"c"}, {"literal":"/"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "regexp", "symbols": ["regexp$string$1"]}
 ]

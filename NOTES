@@ -2,3 +2,26 @@
 nearleyc csvchef.ne -o csvchef.js
 
 cat csvchef.txt | nearley-test -q csvchef.js
+
+
+nearleyc test.ne -o test.js
+
+cat test.txt | nearley-test -q test.js
+
+
+
+function flatten(arr) {
+  return arr.reduce(function (flat, toFlatten) {
+    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+  }, []);
+}
+
+
+replace -> _ "in" __ field __ "replace" __ string_or_regexp __ "with" __ string _ {%
+    function(d) {
+        return JSON.parse(["\"", d[3], ":str.replace(", d[7], ",@@@", d[10], "@@@)\""].join("")).replace(/@@@/g, "\"");
+    }
+%}
+
+        return JSON.parse(["\"", d.join("+"), "\""].join(""));
+

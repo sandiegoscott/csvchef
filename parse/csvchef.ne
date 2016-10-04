@@ -6,10 +6,9 @@
   }, []);
 } %}
 
-@builtin "whitespace.ne"
 @builtin "string.ne"
 
-main -> null | main statement {% function(data) { return flatten(data); } %}
+main -> null | main statement # {% function(d) { return flatten(d); } %}
 
 statement -> write | replace | insert
 
@@ -28,5 +27,10 @@ write_append_prepend -> "write" | "append" | "prepend"
 before_after -> "before" | "after"
 
 string ->  dqstring | sqstring
-field  -> "Name"    # string
+field  ->  [a-zA-Z0-9]
 regexp -> "/abc/"   # "/" string "/" # 
+
+# Whitespace: `_` is optional, `__` is mandatory.
+_  -> wschar:* {% function(d) {return null;} %}
+__ -> wschar:+ {% function(d) {return null;} %}
+wschar -> [ \f\t\v] {% id %}
