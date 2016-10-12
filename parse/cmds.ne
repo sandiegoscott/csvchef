@@ -1,9 +1,17 @@
 
-@{% function flatten(arr) {
-  return arr.reduce(function (flat, toFlatten) {
-    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
-  }, []);
-} %}
+@{%
+  function flatten(arr) {
+    return arr.reduce(function (flat, toFlatten) {
+      return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+    }, []);
+  }
+
+  function write(d) {
+    col = d[3];
+    colname = d[4];
+    return JSON.parse(["\"", col, ":", colname, "\""].join(""));
+  }
+%}
 
 @{%
 var appendItem = function (a, b) { return function (d) { return d[a].concat([d[b]]); } };
@@ -13,29 +21,26 @@ var emptyStr = function (d) { return ""; };
 %}
 
 cmds              -> null
-                   | cmds _ cmd                       {% function(d) { return flatten(d); } %}
+                   | cmd
+                   | cmd newline cmds                  {% function(d) { return flatten(d); } %}
 
-cmd               -> "to" __ "Name" __ "write" __ quoted_field    #{% appendItem(0,2) %}
+cmd               -> "to" __ "Name" __ "write" __ field    {% function (d) { return d[6]; } %}
 
-field             -> unquoted_field                   {% id %}
-                   | quote quoted_field quote           {% function (d) { return d[1]; } %}
+field             -> quoted_field
+                   | unquoted_field
 
-unquoted_field    -> null                            {% emptyStr %}
-                   | unquoted_field char             {% appendItemChar(0,1) %}
+quoted_field      -> quote quoted_char:* quote        {% function (d) { return d[1].join(""); } %}
 
-#quoted_field      -> quoted_field quoted_field_char  {% appendItemChar(0,1) %}
+unquoted_field    -> unquoted_char:*                  {% function (d) { return d[0].join(""); } %}
 
-quoted_field      -> quote notquote:* quote          {% appendItemChar(0,2) %}
+quote             -> "\""                             {% id %}
+quoted_char       -> [^"]                             {% id %}
+unquoted_char     -> [^ "]                            {% id %}
 
-quote             -> "\""
-notquote          -> [^"]
-
-quoted_field_char -> null | [^"]                      {% id %}
-
-char              -> [^ \"\r\n\t\v\f]                {% id %}
-
+newline           -> "\r" "\n"                        {% empty %}
+                   | "\r" | "\n"                      {% empty %}
 
 # Whitespace: `_` is optional, `__` is mandatory.
-_  -> wschar:* {% function(d) {return null;} %}
-__ -> wschar:+ {% function(d) {return null;} %}
-wschar -> [ \r\n\t\v\f] {% id %}
+_                 -> wschar:* {% function(d) {return null;} %}
+__                -> wschar:+ {% function(d) {return null;} %}
+wschar            -> [ \t\v\f] {% id %}

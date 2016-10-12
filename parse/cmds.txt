@@ -1,1 +1,2 @@
-to Name write "abc"
+to Name write ab
+to Name write "ab"
