@@ -9,10 +9,10 @@ function id(x) {return x[0]; }
     }, []);
   }
 
-  function write(d) {
-    col = d[3];
-    colname = d[4];
-    return JSON.parse(["\"", col, ":", colname, "\""].join(""));
+  function command_write(d) {
+    colname = d[2][0];
+    string = d[6][0];
+    return ["WRITE", colname, string];
   }
 
 
@@ -24,19 +24,18 @@ var grammar = {
     ParserRules: [
     {"name": "cmds", "symbols": []},
     {"name": "cmds", "symbols": ["cmd"]},
-    {"name": "cmds", "symbols": ["cmd", "newline", "cmds"], "postprocess": function(d) { return flatten(d); }},
+    {"name": "cmds", "symbols": ["cmd", "newline", "cmds"]},
     {"name": "cmd$string$1", "symbols": [{"literal":"t"}, {"literal":"o"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "cmd$string$2", "symbols": [{"literal":"N"}, {"literal":"a"}, {"literal":"m"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "cmd$string$3", "symbols": [{"literal":"w"}, {"literal":"r"}, {"literal":"i"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "cmd", "symbols": ["cmd$string$1", "__", "cmd$string$2", "__", "cmd$string$3", "__", "field"], "postprocess": function (d) { return d[6]; }},
-    {"name": "field", "symbols": ["quoted_field"]},
-    {"name": "field", "symbols": ["unquoted_field"]},
-    {"name": "quoted_field$ebnf$1", "symbols": []},
-    {"name": "quoted_field$ebnf$1", "symbols": ["quoted_char", "quoted_field$ebnf$1"], "postprocess": function arrconcat(d) {return [d[0]].concat(d[1]);}},
-    {"name": "quoted_field", "symbols": ["quote", "quoted_field$ebnf$1", "quote"], "postprocess": function (d) { return d[1].join(""); }},
-    {"name": "unquoted_field$ebnf$1", "symbols": []},
-    {"name": "unquoted_field$ebnf$1", "symbols": ["unquoted_char", "unquoted_field$ebnf$1"], "postprocess": function arrconcat(d) {return [d[0]].concat(d[1]);}},
-    {"name": "unquoted_field", "symbols": ["unquoted_field$ebnf$1"], "postprocess": function (d) { return d[0].join(""); }},
+    {"name": "cmd$string$2", "symbols": [{"literal":"w"}, {"literal":"r"}, {"literal":"i"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "cmd", "symbols": ["cmd$string$1", "__", "string", "__", "cmd$string$2", "__", "string"], "postprocess": function (d) { return command_write(d); }},
+    {"name": "string", "symbols": ["quoted_string"]},
+    {"name": "string", "symbols": ["unquoted_string"]},
+    {"name": "quoted_string$ebnf$1", "symbols": []},
+    {"name": "quoted_string$ebnf$1", "symbols": ["quoted_char", "quoted_string$ebnf$1"], "postprocess": function arrconcat(d) {return [d[0]].concat(d[1]);}},
+    {"name": "quoted_string", "symbols": ["quote", "quoted_string$ebnf$1", "quote"], "postprocess": function (d) { return d[1].join(""); }},
+    {"name": "unquoted_string$ebnf$1", "symbols": []},
+    {"name": "unquoted_string$ebnf$1", "symbols": ["unquoted_char", "unquoted_string$ebnf$1"], "postprocess": function arrconcat(d) {return [d[0]].concat(d[1]);}},
+    {"name": "unquoted_string", "symbols": ["unquoted_string$ebnf$1"], "postprocess": function (d) { return d[0].join(""); }},
     {"name": "quote", "symbols": [{"literal":"\""}], "postprocess": id},
     {"name": "quoted_char", "symbols": [/[^"]/], "postprocess": id},
     {"name": "unquoted_char", "symbols": [/[^ "]/], "postprocess": id},
