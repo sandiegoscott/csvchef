@@ -6,7 +6,7 @@ cat csvchef.txt | nearley-test -q csvchef.js
 
 nearleyc test.ne -o test.js
 
-cat test.txt | nearley-test -q test.js
+cat test.txt | nearley-test test.js -q
 
 
 

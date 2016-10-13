@@ -1,2 +1,5 @@
-to Name write "An"
 to Address write 123
+to Name write "An"
+in Name replace  Mrs  with "Ms"
+in Name replace "Mrs" with "Ms"
+in Name replace /Mrs/ with "Ms"

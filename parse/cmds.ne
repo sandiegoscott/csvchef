@@ -17,11 +17,20 @@
     }
 
     function operation( op, d ) {
+        //console.log("------")
+        //console.log(op, JSON.stringify(d));
+        //console.log("------")
         switch(op) {
             case "WRITE":
-                colname = d[2][0];
+                column = d[2][0];
                 string = d[6][0];
-                return ["WRITE", colname, string];
+                return ["WRITE", column, string];
+                break;
+            case "REPLACE":
+                column = d[2][0];
+                expression = d[6];
+                string = d[10][0];
+                return ["REPLACE", column, expression, string];
                 break;
             default:
                 return ["UNKNOWN"];
@@ -37,25 +46,26 @@ var empty = function (d) { return []; };
 var emptyStr = function (d) { return ""; };
 %}
 
-rows              -> null
-                   | row
-                   | rows newline row                                       {% appendItem(0,2) %}
+rows                -> null
+                     | row
+                     | rows newline row                                                 {% appendItem(0,2) %}
 
-row               -> "to" __ string __ "write" __ string                    {% function (d) { return operation("WRITE", d); } %}
+row                 -> "to" __ column __ "write" __ string                              {% function (d) { return operation("WRITE", d); } %}
+                     | "in" __ column __ "replace" __ string __ "with" __ string        {% function (d) { return operation("REPLACE", d); } %}
 
-string             -> quoted_string
-                   | unquoted_string
+column              -> string                           {% id %}  # [a-zA-Z0-9]
 
-quoted_string      -> quote quoted_char:* quote       {% function (d) { return d[1].join(""); } %}
+string              -> unquoted_string                  {% id %}
+                     | quoted_string                    {% id %}
+quoted_string       -> quote quoted_char:* quote        {% function (d) { return d[1].join(""); } %}
+unquoted_string     -> unquoted_char:*                  {% function (d) { return d[0].join(""); } %}
 
-unquoted_string    -> unquoted_char:*                 {% function (d) { return d[0].join(""); } %}
-
-quote             -> "\""                             {% id %}
-quoted_char       -> [^"]                             {% id %}
-unquoted_char     -> [^ "]                            {% id %}
-
-newline           -> "\r" "\n"                        {% empty %}
-                   | "\r" | "\n"                      {% empty %}
+quote               -> "\""                             {% id %}
+quoted_char         -> [^"]                             {% id %}
+unquoted_char       -> [^ "]                            {% id %}
+newline             -> "\r" "\n"                        {% empty %}
+                     | "\r"                             {% empty %}
+                     | "\n"                             {% empty %}
 
 # Whitespace: `_` is optional, `__` is mandatory.
 _                 -> wschar:* {% function(d) {return null;} %}
