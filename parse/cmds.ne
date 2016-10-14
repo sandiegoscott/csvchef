@@ -1,48 +1,19 @@
-@{%
-function operation( op, d ) {
-    //console.log("------")
-    //console.log(op, JSON.stringify(d));
-    //console.log("------")
-    switch(op) {
-        case "WRITE":
-            column = d[2];
-            string = d[6];
-            return ["WRITE", column, string];
-            break;
-        case "REPLACE":
-            column = d[2];
-            expression = d[6];
-            string = d[10];
-            return ["REPLACE", column, expression, string];
-            break;
-        case "INSERT":
-            column = d[2];
-            before_after = d[4];
-            target = d[6];
-            string = d[10];
-            return ["INSERT", column, before_after, target, string];
-            break;
-        default:
-            return ["UNKNOWN"];
-    }
-
-}
-
-var appendItem = function (a, b) { return function (d) { return d[a].concat([d[b]]); } };
-var appendItemChar = function (a, b) { return function (d) { return d[a].concat(d[b]); } };
-var empty = function (d) { return []; };
-var emptyStr = function (d) { return ""; };
-%}
+#
+#  CSV Chef
+#
 
 rows                -> null
-                     | row
-                     | rows newline row                                                 {% appendItem(0,2) %}
+                     | row_op
+                     | rows newline row_op                                              {% appendItem(0,2) %}
 
-row                 -> "to" __ column __ "write" __ string                              {% function (d) { return operation("WRITE", d); } %}
-                     | "in" __ column __ "replace" __ string __ "with" __ string        {% function (d) { return operation("REPLACE", d); } %}
-                     | "in" __ column __ before_after __ string __ "insert" __ string   {% function (d) { return operation("INSERT", d); } %}
+row_op              -> "to" __ column __ write_pend __ string                           {% function (d) { return operation("write_pend", d); } %}
+                     | "in" __ column __ "replace" __ string __ "with" __ string        {% function (d) { return operation("replace", d); } %}
+                     | "in" __ column __ before_after __ string __ "insert" __ string   {% function (d) { return operation("insert", d); } %}
 
-write_append_prepend -> "write" | "append" | "prepend"
+write_pend          -> "write"                          {% function(d) { return d[0]; } %}
+                     | "append"                         {% function(d) { return d[0]; } %}
+                     | "prepend"                        {% function(d) { return d[0]; } %}
+
 before_after        -> "before"                         {% function(d) { return d[0]; } %}
                      | "after"                          {% function(d) { return d[0]; } %}
 
@@ -64,3 +35,41 @@ newline             -> "\r" "\n"                        {% empty %}
 _                 -> wschar:*                           {% function(d) { return null; } %}
 __                -> wschar:+                           {% function(d) { return null; } %}
 wschar            -> [ \t\v\f]                          {% function(d) { return d[0]; } %}
+
+
+@{%
+function operation( op, d ) {
+    //console.log("------")
+    //console.log(op, JSON.stringify(d));
+    //console.log("------")
+    switch(op) {
+        case "write_pend":
+            column = d[2];
+            op     = d[4]
+            string = d[6];
+            return [op, column, string];
+            break;
+        case "replace":
+            column = d[2];
+            expression = d[6];
+            string = d[10];
+            return ["replace", column, expression, string];
+            break;
+        case "insert":
+            column = d[2];
+            before_after = d[4];
+            target = d[6];
+            string = d[10];
+            return ["insert", column, before_after, target, string];
+            break;
+        default:
+            return ["ERROR", "Unknown operation " + op]; // won't reach this line
+    }
+
+}
+
+var appendItem = function (a, b) { return function (d) { return d[a].concat([d[b]]); } };
+var appendItemChar = function (a, b) { return function (d) { return d[a].concat(d[b]); } };
+var empty = function (d) { return []; };
+var emptyStr = function (d) { return ""; };
+%}

@@ -1,4 +1,6 @@
 to Address write 123
+to Address prepend 123
+to Address append 123
 to Name write "An"
 in Name replace  Mrs  with "Ms"
 in Name replace "Mrs" with "Ms"

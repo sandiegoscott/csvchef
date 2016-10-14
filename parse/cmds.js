@@ -8,26 +8,27 @@ function operation( op, d ) {
     //console.log(op, JSON.stringify(d));
     //console.log("------")
     switch(op) {
-        case "WRITE":
+        case "write_pend":
             column = d[2];
+            op     = d[4]
             string = d[6];
-            return ["WRITE", column, string];
+            return [op, column, string];
             break;
-        case "REPLACE":
+        case "replace":
             column = d[2];
             expression = d[6];
             string = d[10];
-            return ["REPLACE", column, expression, string];
+            return ["replace", column, expression, string];
             break;
-        case "INSERT":
+        case "insert":
             column = d[2];
             before_after = d[4];
             target = d[6];
             string = d[10];
-            return ["INSERT", column, before_after, target, string];
+            return ["insert", column, before_after, target, string];
             break;
         default:
-            return ["UNKNOWN"];
+            return ["ERROR", "Unknown operation " + op]; // won't reach this line
     }
 
 }
@@ -39,24 +40,23 @@ var emptyStr = function (d) { return ""; };
 var grammar = {
     ParserRules: [
     {"name": "rows", "symbols": []},
-    {"name": "rows", "symbols": ["row"]},
-    {"name": "rows", "symbols": ["rows", "newline", "row"], "postprocess": appendItem(0,2)},
-    {"name": "row$string$1", "symbols": [{"literal":"t"}, {"literal":"o"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "row$string$2", "symbols": [{"literal":"w"}, {"literal":"r"}, {"literal":"i"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "row", "symbols": ["row$string$1", "__", "column", "__", "row$string$2", "__", "string"], "postprocess": function (d) { return operation("WRITE", d); }},
-    {"name": "row$string$3", "symbols": [{"literal":"i"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "row$string$4", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"l"}, {"literal":"a"}, {"literal":"c"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "row$string$5", "symbols": [{"literal":"w"}, {"literal":"i"}, {"literal":"t"}, {"literal":"h"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "row", "symbols": ["row$string$3", "__", "column", "__", "row$string$4", "__", "string", "__", "row$string$5", "__", "string"], "postprocess": function (d) { return operation("REPLACE", d); }},
-    {"name": "row$string$6", "symbols": [{"literal":"i"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "row$string$7", "symbols": [{"literal":"i"}, {"literal":"n"}, {"literal":"s"}, {"literal":"e"}, {"literal":"r"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "row", "symbols": ["row$string$6", "__", "column", "__", "before_after", "__", "string", "__", "row$string$7", "__", "string"], "postprocess": function (d) { return operation("INSERT", d); }},
-    {"name": "write_append_prepend$string$1", "symbols": [{"literal":"w"}, {"literal":"r"}, {"literal":"i"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "write_append_prepend", "symbols": ["write_append_prepend$string$1"]},
-    {"name": "write_append_prepend$string$2", "symbols": [{"literal":"a"}, {"literal":"p"}, {"literal":"p"}, {"literal":"e"}, {"literal":"n"}, {"literal":"d"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "write_append_prepend", "symbols": ["write_append_prepend$string$2"]},
-    {"name": "write_append_prepend$string$3", "symbols": [{"literal":"p"}, {"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"e"}, {"literal":"n"}, {"literal":"d"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "write_append_prepend", "symbols": ["write_append_prepend$string$3"]},
+    {"name": "rows", "symbols": ["row_op"]},
+    {"name": "rows", "symbols": ["rows", "newline", "row_op"], "postprocess": appendItem(0,2)},
+    {"name": "row_op$string$1", "symbols": [{"literal":"t"}, {"literal":"o"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "row_op", "symbols": ["row_op$string$1", "__", "column", "__", "write_pend", "__", "string"], "postprocess": function (d) { return operation("write_pend", d); }},
+    {"name": "row_op$string$2", "symbols": [{"literal":"i"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "row_op$string$3", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"l"}, {"literal":"a"}, {"literal":"c"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "row_op$string$4", "symbols": [{"literal":"w"}, {"literal":"i"}, {"literal":"t"}, {"literal":"h"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "row_op", "symbols": ["row_op$string$2", "__", "column", "__", "row_op$string$3", "__", "string", "__", "row_op$string$4", "__", "string"], "postprocess": function (d) { return operation("replace", d); }},
+    {"name": "row_op$string$5", "symbols": [{"literal":"i"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "row_op$string$6", "symbols": [{"literal":"i"}, {"literal":"n"}, {"literal":"s"}, {"literal":"e"}, {"literal":"r"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "row_op", "symbols": ["row_op$string$5", "__", "column", "__", "before_after", "__", "string", "__", "row_op$string$6", "__", "string"], "postprocess": function (d) { return operation("insert", d); }},
+    {"name": "write_pend$string$1", "symbols": [{"literal":"w"}, {"literal":"r"}, {"literal":"i"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "write_pend", "symbols": ["write_pend$string$1"], "postprocess": function(d) { return d[0]; }},
+    {"name": "write_pend$string$2", "symbols": [{"literal":"a"}, {"literal":"p"}, {"literal":"p"}, {"literal":"e"}, {"literal":"n"}, {"literal":"d"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "write_pend", "symbols": ["write_pend$string$2"], "postprocess": function(d) { return d[0]; }},
+    {"name": "write_pend$string$3", "symbols": [{"literal":"p"}, {"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"e"}, {"literal":"n"}, {"literal":"d"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "write_pend", "symbols": ["write_pend$string$3"], "postprocess": function(d) { return d[0]; }},
     {"name": "before_after$string$1", "symbols": [{"literal":"b"}, {"literal":"e"}, {"literal":"f"}, {"literal":"o"}, {"literal":"r"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "before_after", "symbols": ["before_after$string$1"], "postprocess": function(d) { return d[0]; }},
     {"name": "before_after$string$2", "symbols": [{"literal":"a"}, {"literal":"f"}, {"literal":"t"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
