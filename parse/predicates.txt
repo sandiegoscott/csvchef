@@ -1,0 +1,9 @@
+where Name equals Smith
+where Name contains Jones
+where Name does not contain Jones
+where Name starts with "Jon"
+where Name ends with "son"
+where Name matches "/abc/"
+where Name split("|")[2] matches "/abc/"
+where Name is alpha
+where Field is not numeric
